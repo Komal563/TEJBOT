@@ -1,0 +1,49 @@
+#!/bin/bash
+
+
+_get_repolink () {
+    local regex
+    regex='(https?)://github.com/.+/.+'
+    if [[ $TEJ_REPO == "TEJBot" ]]
+    then
+        echo "aHR0cHM6Ly9naXRodWIuY29tL1RFSlhPUy9URUpVU0VSQk9UL2FyY2hpdmUvbWFzdGVyLnppcA==" | base64 -d
+    elif [[ $TEJ_REPO == "TEJBot" ]]
+    then
+        echo "aHR0cHM6Ly9naXRodWIuY29tL1RFSlhPUy9URUpVU0VSQk9UL2FyY2hpdmUvbWFzdGVyLnppcA==" | base64 -d
+    elif [[ $TEJ_REPO =~ $regex ]]
+    then
+        if [[ $TEJ_REPO_BRANCH ]]
+        then
+            echo "${TEJ_REPO}/archive/${TEJ_REPO_BRANCH}.zip"
+        else
+            echo "${TEJ_REPO}/archive/master.zip"
+        fi
+    else
+        echo "aHR0cHM6Ly9naXRodWIuY29tL1RFSlhPUy9URUpVU0VSQk9UL2FyY2hpdmUvbWFzdGVyLnppcA==" | base64 -d
+    fi
+}
+
+
+_set_bot () {
+    local zippath
+    zippath="TEJBot.zip"
+    echo "  Downloading source code ..."
+    wget -q $(_get_repolink) -O "$zippath"
+    echo "  Unpacking Data ..."
+    TEJPATH=$(zipinfo -1 "$zippath" | grep -v "/.");
+    unzip -qq "$zippath"
+    echo "Done"
+    echo "  Cleaning ..."
+    rm -rf "$zippath"
+    sleep 5
+    cd $TEJPATH
+    echo "    Starting TEJBot    "
+    echo "
+    TEJBOT
+    "
+
+    python3 ../setup/updater.py ../requirements.txt requirements.txt
+    python3 -m userbot
+}
+
+_set_bot
